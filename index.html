@@ -1,0 +1,3859 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SahaSnap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        
+        
+        /* ===== EMAIL VERIFICATION BANNER ===== */
+        .email-warning-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .email-warning-banner.show {
+            display: flex;
+        }
+        
+        .email-warning-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .email-warning-content {
+            flex: 1;
+        }
+        
+        .email-warning-title {
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+        
+        .email-warning-text {
+            font-size: 0.9rem;
+            color: #78350f;
+            line-height: 1.4;
+        }
+        
+        .email-warning-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        .email-warning-btn:hover {
+            background: #d97706;
+        }
+        
+        .email-warning-close {
+            background: none;
+            border: none;
+            color: #92400e;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        /* ===== SPLASH SCREEN ===== */
+        #splash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        #splash.hide { opacity: 0; pointer-events: none; }
+
+        .splash-logo {
+            width: 160px;
+            height: 160px;
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        .splash-title {
+            margin-top: 30px;
+            font-size: 2.8rem;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .splash-tagline {
+            margin-top: 12px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: 400;
+            letter-spacing: 1px;
+            animation: fadeInUp 1.2s ease 0.5s both;
+        }
+
+        .splash-loader {
+            margin-top: 40px;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite, fadeInUp 1s ease 0.7s both;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes steamFloat {
+            0% { opacity: 0; transform: translateY(0) scale(0.8); }
+            50% { opacity: 1; transform: translateY(-15px) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+        }
+
+        .steam-1 { animation: steamFloat 3s ease-in-out infinite; }
+        .steam-2 { animation: steamFloat 3s ease-in-out 0.5s infinite; }
+        .steam-3 { animation: steamFloat 3s ease-in-out 1s infinite; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        body.ltr { direction: ltr; }
+
+        /* ===== APP BAR ===== */
+        .app-bar {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .app-bar-title { 
+            color: white; 
+            font-size: 1.3rem; 
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-bar-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+/* ===== LANGUAGE ===== */
+        .lang-wrapper { position: relative; }
+        .lang-trigger {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.2);
+            border: 1.5px solid rgba(255,255,255,0.5);
+            color: white; padding: 8px 14px; border-radius: 20px;
+            cursor: pointer; font-size: 0.95rem; transition: background 0.2s;
+        }
+        .lang-trigger:hover { background: rgba(255,255,255,0.3); }
+        .lang-arrow { font-size: 0.6rem; transition: transform 0.3s; }
+        .lang-arrow.open { transform: rotate(180deg); }
+        .lang-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0;
+            background: white; border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden; min-width: 160px;
+            opacity: 0; transform: translateY(-8px) scale(0.96);
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        body.ltr .lang-dropdown { left: auto; right: 0; }
+        .lang-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        .lang-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 13px 18px; cursor: pointer; font-size: 0.95rem;
+            color: #333; transition: background 0.15s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .lang-option:last-child { border-bottom: none; }
+        .lang-option:hover { background: #f0fdf4; color: #16a34a; }
+        .lang-option.selected { background: #dcfce7; color: #16a34a; font-weight: bold; }
+        .lang-check { margin-right: auto; color: #16a34a; display: none; }
+        body.ltr .lang-check { margin-right: 0; margin-left: auto; }
+        .lang-option.selected .lang-check { display: block; }
+
+        /* ===== PAGE ===== */
+        .page { padding: 25px 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .logo { font-size: 3rem; font-weight: bold; margin-bottom: 10px; }
+        .tagline { font-size: 1.1rem; opacity: 0.9; }
+
+        /* ===== CARD ===== */
+        .card {
+            background: white; border-radius: 20px;
+            padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .section { margin-bottom: 25px; }
+        .label { display: block; font-weight: bold; margin-bottom: 12px; color: #333; font-size: 1rem; }
+
+        .cond-label-row {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+        }
+        .cond-label-text { font-weight: bold; color: #333; font-size: 1rem; }
+
+        /* ===== NONE BUTTON ===== */
+        .none-btn {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #555;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .none-btn:hover { border-color: #16a34a; background: #f0fdf4; }
+        .none-btn.selected {
+            border: 2.5px solid #16a34a;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.45);
+        }
+
+        /* ===== CONDITION GRID ===== */
+        .condition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .cond-btn {
+            padding: 16px 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.88rem;
+            color: #555;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+        .cond-btn:hover { border-color: #16a34a; background: #f0fdf4; color: #555; }
+        .cond-btn.selected {
+            border: 2.5px solid #16a34a;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.45);
+            transform: translateY(-2px);
+        }
+        .cond-btn .cond-label { display: block; }
+
+        /* ===== ATHLETE CARD ===== */
+        .athlete-card {
+            margin-top: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .athlete-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: #555;
+            transition: background 0.2s;
+        }
+        .athlete-btn:hover { background: #f0fdf4; }
+        .athlete-btn.selected {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: bold;
+        }
+        .athlete-card.selected {
+            border-color: #22c55e;
+            border-width: 2.5px;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+        }
+        .athlete-label { flex: 1; text-align: right; }
+        body.ltr .athlete-label { text-align: left; }
+        .athlete-arrow { font-size: 0.75rem; color: #999; transition: transform 0.3s; }
+        .athlete-arrow.open { transform: rotate(180deg); }
+
+        .athlete-sub {
+            display: none;
+            padding: 12px 16px;
+            background: #f0fdf4;
+            border-top: 1px solid #bbf7d0;
+            gap: 10px;
+        }
+        .athlete-sub.open { display: flex; }
+        
+        .sub-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border: 2px solid #bbf7d0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #166534;
+            text-align: center;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+        .sub-btn:hover { background: #dcfce7; border-color: #22c55e; }
+        .sub-btn.selected {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: #16a34a;
+            border-width: 2.5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(34,197,94,0.4);
+            transform: translateY(-1px);
+        }
+
+        /* ===== CAMERA (NO GALLERY) ===== */
+        .camera-btn {
+            width: 100%; padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 15px;
+            font-size: 1.3rem; font-weight: bold;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .camera-btn:hover { transform: scale(1.02); }
+        #imageInput { display: none; }
+
+        /* ===== PREVIEW ===== */
+        .preview { margin-top: 20px; display: none; position: relative; }
+        .preview img { width: 100%; border-radius: 12px; }
+        .remove-img {
+            position: absolute; top: 10px; left: 10px;
+            background: #ef4444; color: white; border: none;
+            width: 36px; height: 36px; border-radius: 50%;
+            font-size: 1.1rem; cursor: pointer; font-weight: bold;
+        }
+        body.ltr .remove-img { left: auto; right: 10px; }
+
+        /* ===== INGREDIENTS ===== */
+        .ingredients-section { display: none; margin-top: 20px; animation: fadeIn 0.35s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .ingredients-card {
+            background: #f8f7ff; border: 2px solid #e0d9ff; border-radius: 16px; padding: 20px;
+        }
+        .ingredients-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .ingredients-title { font-weight: bold; color: #333; font-size: 0.95rem; flex: 1; line-height: 1.4; }
+        .optional-badge {
+            background: #ede9fe; color: #7c3aed;
+            font-size: 0.72rem; padding: 3px 10px;
+            border-radius: 20px; font-weight: bold; white-space: nowrap;
+        }
+        .ingredients-textarea {
+            width: 100%; min-height: 95px; padding: 14px;
+            border: 2px solid #e0e0e0; border-radius: 12px;
+            font-size: 0.95rem; font-family: Arial, sans-serif;
+            resize: vertical; background: white; transition: border-color 0.2s; line-height: 1.6;
+        }
+        .ingredients-textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+
+        .why-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: none; border: none; color: #667eea;
+            font-size: 0.82rem; cursor: pointer; margin-top: 10px; padding: 4px 0;
+        }
+        .why-btn:hover { color: #4f46e5; text-decoration: underline; }
+        .why-tooltip {
+            display: none; margin-top: 10px; padding: 14px;
+            background: white; border: 1.5px solid #c4b5fd;
+            border-radius: 12px; font-size: 0.88rem; color: #555; line-height: 1.7;
+            animation: fadeIn 0.25s ease;
+        }
+        .why-tooltip.show { display: block; }
+
+        /* ===== ANALYZE ===== */
+        .analyze-btn {
+            width: 100%; padding: 18px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white; border: none; border-radius: 14px;
+            font-size: 1.15rem; font-weight: bold; cursor: pointer;
+            margin-top: 18px; display: none; transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(16,185,129,0.35);
+        }
+        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.45); }
+
+        /* ===== SUBSCRIPTION MODAL ===== */
+        .sub-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .sub-modal.show { display: flex; }
+
+        .sub-content {
+            background: white;
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .sub-close {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #f3f4f6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .sub-close:hover { background: #e5e7eb; }
+        body.ltr .sub-close { left: auto; right: 15px; }
+
+        .sub-icon {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sub-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .sub-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .sub-plans {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .plan-card {
+            border: 2.5px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .plan-card:hover {
+            border-color: #2ECC71;
+            background: #f0fdf4;
+        }
+
+        .plan-card.selected {
+            border-color: #2ECC71;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            box-shadow: 0 4px 14px rgba(46,204,113,0.25);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        body.ltr .plan-badge { right: auto; left: 15px; }
+
+        .plan-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .plan-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .plan-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2ECC71;
+        }
+
+        .plan-price small {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: normal;
+        }
+
+        .plan-desc {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .subscribe-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2ECC71, #27AE60);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(46,204,113,0.35);
+        }
+
+        .subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46,204,113,0.45);
+        }
+
+        .sub-footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        /* ===== LOADING ===== */
+        .loading { text-align: center; padding: 30px; display: none; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid #f3f3f3; border-top: 5px solid #667e<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SahaSnap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        
+        
+        /* ===== EMAIL VERIFICATION BANNER ===== */
+        .email-warning-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .email-warning-banner.show {
+            display: flex;
+        }
+        
+        .email-warning-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .email-warning-content {
+            flex: 1;
+        }
+        
+        .email-warning-title {
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+        
+        .email-warning-text {
+            font-size: 0.9rem;
+            color: #78350f;
+            line-height: 1.4;
+        }
+        
+        .email-warning-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        .email-warning-btn:hover {
+            background: #d97706;
+        }
+        
+        .email-warning-close {
+            background: none;
+            border: none;
+            color: #92400e;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        /* ===== SPLASH SCREEN ===== */
+        #splash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        #splash.hide { opacity: 0; pointer-events: none; }
+
+        .splash-logo {
+            width: 160px;
+            height: 160px;
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        .splash-title {
+            margin-top: 30px;
+            font-size: 2.8rem;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .splash-tagline {
+            margin-top: 12px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: 400;
+            letter-spacing: 1px;
+            animation: fadeInUp 1.2s ease 0.5s both;
+        }
+
+        .splash-loader {
+            margin-top: 40px;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite, fadeInUp 1s ease 0.7s both;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes steamFloat {
+            0% { opacity: 0; transform: translateY(0) scale(0.8); }
+            50% { opacity: 1; transform: translateY(-15px) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+        }
+
+        .steam-1 { animation: steamFloat 3s ease-in-out infinite; }
+        .steam-2 { animation: steamFloat 3s ease-in-out 0.5s infinite; }
+        .steam-3 { animation: steamFloat 3s ease-in-out 1s infinite; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        body.ltr { direction: ltr; }
+
+        /* ===== APP BAR ===== */
+        .app-bar {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .app-bar-title { 
+            color: white; 
+            font-size: 1.3rem; 
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-bar-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+/* ===== LANGUAGE ===== */
+        .lang-wrapper { position: relative; }
+        .lang-trigger {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.2);
+            border: 1.5px solid rgba(255,255,255,0.5);
+            color: white; padding: 8px 14px; border-radius: 20px;
+            cursor: pointer; font-size: 0.95rem; transition: background 0.2s;
+        }
+        .lang-trigger:hover { background: rgba(255,255,255,0.3); }
+        .lang-arrow { font-size: 0.6rem; transition: transform 0.3s; }
+        .lang-arrow.open { transform: rotate(180deg); }
+        .lang-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0;
+            background: white; border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden; min-width: 160px;
+            opacity: 0; transform: translateY(-8px) scale(0.96);
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        body.ltr .lang-dropdown { left: auto; right: 0; }
+        .lang-dropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        .lang-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 13px 18px; cursor: pointer; font-size: 0.95rem;
+            color: #333; transition: background 0.15s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .lang-option:last-child { border-bottom: none; }
+        .lang-option:hover { background: #f0fdf4; color: #16a34a; }
+        .lang-option.selected { background: #dcfce7; color: #16a34a; font-weight: bold; }
+        .lang-check { margin-right: auto; color: #16a34a; display: none; }
+        body.ltr .lang-check { margin-right: 0; margin-left: auto; }
+        .lang-option.selected .lang-check { display: block; }
+
+        /* ===== PAGE ===== */
+        .page { padding: 25px 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .logo { font-size: 3rem; font-weight: bold; margin-bottom: 10px; }
+        .tagline { font-size: 1.1rem; opacity: 0.9; }
+
+        /* ===== CARD ===== */
+        .card {
+            background: white; border-radius: 20px;
+            padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .section { margin-bottom: 25px; }
+        .label { display: block; font-weight: bold; margin-bottom: 12px; color: #333; font-size: 1rem; }
+
+        .cond-label-row {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+        }
+        .cond-label-text { font-weight: bold; color: #333; font-size: 1rem; }
+
+        /* ===== NONE BUTTON ===== */
+        .none-btn {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #555;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .none-btn:hover { border-color: #16a34a; background: #f0fdf4; }
+        .none-btn.selected {
+            border: 2.5px solid #16a34a;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.45);
+        }
+
+        /* ===== CONDITION GRID ===== */
+        .condition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .cond-btn {
+            padding: 16px 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.88rem;
+            color: #555;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+        .cond-btn:hover { border-color: #16a34a; background: #f0fdf4; color: #555; }
+        .cond-btn.selected {
+            border: 2.5px solid #16a34a;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.45);
+            transform: translateY(-2px);
+        }
+        .cond-btn .cond-label { display: block; }
+
+        /* ===== ATHLETE CARD ===== */
+        .athlete-card {
+            margin-top: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .athlete-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: #555;
+            transition: background 0.2s;
+        }
+        .athlete-btn:hover { background: #f0fdf4; }
+        .athlete-btn.selected {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: bold;
+        }
+        .athlete-card.selected {
+            border-color: #22c55e;
+            border-width: 2.5px;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+        }
+        .athlete-label { flex: 1; text-align: right; }
+        body.ltr .athlete-label { text-align: left; }
+        .athlete-arrow { font-size: 0.75rem; color: #999; transition: transform 0.3s; }
+        .athlete-arrow.open { transform: rotate(180deg); }
+
+        .athlete-sub {
+            display: none;
+            padding: 12px 16px;
+            background: #f0fdf4;
+            border-top: 1px solid #bbf7d0;
+            gap: 10px;
+        }
+        .athlete-sub.open { display: flex; }
+        
+        .sub-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border: 2px solid #bbf7d0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #166534;
+            text-align: center;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+        .sub-btn:hover { background: #dcfce7; border-color: #22c55e; }
+        .sub-btn.selected {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: #16a34a;
+            border-width: 2.5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(34,197,94,0.4);
+            transform: translateY(-1px);
+        }
+
+        /* ===== CAMERA (NO GALLERY) ===== */
+        .camera-btn {
+            width: 100%; padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 15px;
+            font-size: 1.3rem; font-weight: bold;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .camera-btn:hover { transform: scale(1.02); }
+        #imageInput { display: none; }
+
+        /* ===== PREVIEW ===== */
+        .preview { margin-top: 20px; display: none; position: relative; }
+        .preview img { width: 100%; border-radius: 12px; }
+        .remove-img {
+            position: absolute; top: 10px; left: 10px;
+            background: #ef4444; color: white; border: none;
+            width: 36px; height: 36px; border-radius: 50%;
+            font-size: 1.1rem; cursor: pointer; font-weight: bold;
+        }
+        body.ltr .remove-img { left: auto; right: 10px; }
+
+        /* ===== INGREDIENTS ===== */
+        .ingredients-section { display: none; margin-top: 20px; animation: fadeIn 0.35s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .ingredients-card {
+            background: #f8f7ff; border: 2px solid #e0d9ff; border-radius: 16px; padding: 20px;
+        }
+        .ingredients-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .ingredients-title { font-weight: bold; color: #333; font-size: 0.95rem; flex: 1; line-height: 1.4; }
+        .optional-badge {
+            background: #ede9fe; color: #7c3aed;
+            font-size: 0.72rem; padding: 3px 10px;
+            border-radius: 20px; font-weight: bold; white-space: nowrap;
+        }
+        .ingredients-textarea {
+            width: 100%; min-height: 95px; padding: 14px;
+            border: 2px solid #e0e0e0; border-radius: 12px;
+            font-size: 0.95rem; font-family: Arial, sans-serif;
+            resize: vertical; background: white; transition: border-color 0.2s; line-height: 1.6;
+        }
+        .ingredients-textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+
+        .why-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: none; border: none; color: #667eea;
+            font-size: 0.82rem; cursor: pointer; margin-top: 10px; padding: 4px 0;
+        }
+        .why-btn:hover { color: #4f46e5; text-decoration: underline; }
+        .why-tooltip {
+            display: none; margin-top: 10px; padding: 14px;
+            background: white; border: 1.5px solid #c4b5fd;
+            border-radius: 12px; font-size: 0.88rem; color: #555; line-height: 1.7;
+            animation: fadeIn 0.25s ease;
+        }
+        .why-tooltip.show { display: block; }
+
+        /* ===== ANALYZE ===== */
+        .analyze-btn {
+            width: 100%; padding: 18px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white; border: none; border-radius: 14px;
+            font-size: 1.15rem; font-weight: bold; cursor: pointer;
+            margin-top: 18px; display: none; transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(16,185,129,0.35);
+        }
+        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.45); }
+
+        /* ===== SUBSCRIPTION MODAL ===== */
+        .sub-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .sub-modal.show { display: flex; }
+
+        .sub-content {
+            background: white;
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .sub-close {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #f3f4f6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .sub-close:hover { background: #e5e7eb; }
+        body.ltr .sub-close { left: auto; right: 15px; }
+
+        .sub-icon {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sub-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .sub-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .sub-plans {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .plan-card {
+            border: 2.5px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .plan-card:hover {
+            border-color: #2ECC71;
+            background: #f0fdf4;
+        }
+
+        .plan-card.selected {
+            border-color: #2ECC71;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            box-shadow: 0 4px 14px rgba(46,204,113,0.25);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        body.ltr .plan-badge { right: auto; left: 15px; }
+
+        .plan-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .plan-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .plan-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2ECC71;
+        }
+
+        .plan-price small {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: normal;
+        }
+
+        .plan-desc {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .subscribe-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2ECC71, #27AE60);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(46,204,113,0.35);
+        }
+
+        .subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46,204,113,0.45);
+        }
+
+        .sub-footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        /* ===== LOADING ===== */
+        .loading { text-align: center; padding: 30px; display: none; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid #f3f3f3; border-top: 5px solid #667eea;
+            border-radius: 50%; animation: spin2 1s linear infinite; margin: 0 auto 15px;
+        }
+        @keyframes spin2 { to { transform: rotate(360deg); } }
+
+        /* ===== RESULTS ===== */
+        .results { display: none; margin-top: 25px; }
+        .result-card { padding: 25px; border-radius: 15px; margin-bottom: 15px; }
+        .healthy   { background: #d1fae5; border: 3px solid #10b981; }
+        .moderate  { background: #fef3c7; border: 3px solid #f59e0b; }
+        .unhealthy { background: #fee2e2; border: 3px solid #ef4444; }
+        .status { font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
+        .info-box { margin: 15px 0; }
+        .info-label { font-weight: bold; font-size: 0.9rem; color: #666; margin-bottom: 5px; }
+        .info-text { font-size: 1.05rem; line-height: 1.6; }
+        .ing-tag {
+            display: inline-block; background: #ede9fe; color: #7c3aed;
+            font-size: 0.8rem; padding: 4px 12px; border-radius: 20px; margin-top: 10px;
+        }
+        .retry-btn {
+            width: 100%; padding: 15px; background: white;
+            border: 2px solid #667eea; color: #667eea;
+            border-radius: 12px; font-size: 1rem; font-weight: bold;
+            cursor: pointer; margin-top: 15px; transition: all 0.2s;
+        }
+        .retry-btn:hover { background: #667eea; color: white; }
+
+        /* ===== ERROR ===== */
+        .error-box {
+            background: #fee2e2; border: 2px solid #ef4444;
+            color: #991b1b; padding: 15px; border-radius: 12px;
+            margin-top: 15px; display: none;
+        }
+
+        .overlay { position: fixed; top:0;left:0;right:0;bottom:0; z-index:999; display:none; }
+        .overlay.active { display: block; }
+    
+        /* ===== LOGIN PAGE (ADDED) ===== */
+        #loginPage {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            padding: 20px;
+        }
+        #loginPage.hidden {
+            display: none;
+        }
+        
+        .login-logo-section { 
+            text-align: center; 
+            margin-bottom: 35px; 
+        }
+        .login-logo { 
+            width: 80px; 
+            height: 80px; 
+            margin: 0 auto 15px; 
+        }
+        .login-logo svg { 
+            width: 100%; 
+            height: 100%; 
+            filter: drop-shadow(0 4px 12px rgba(46,204,113,0.3)); 
+        }
+        .login-app-name { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            color: #2ECC71; 
+            margin-bottom: 8px; 
+        }
+        .login-tagline { 
+            color: #6b7280; 
+            font-size: 0.95rem; 
+        }
+        .welcome-text { 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .welcome-text h2 { 
+            font-size: 1.5rem; 
+            color: #1f2937; 
+            margin-bottom: 8px; 
+        }
+        .welcome-text p { 
+            color: #6b7280; 
+            font-size: 0.9rem; 
+        }
+        .login-form-group { 
+            margin-bottom: 20px; 
+        }
+        .login-form-label { 
+            display: block; 
+            font-weight: 600; 
+            color: #374151; 
+            margin-bottom: 8px; 
+            font-size: 0.9rem; 
+        }
+        .login-form-input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            transition: all 0.2s; 
+            background: #f9fafb; 
+        }
+        .login-form-input:focus { 
+            outline: none; 
+            border-color: #2ECC71; 
+            background: white; 
+            box-shadow: 0 0 0 3px rgba(46,204,113,0.1); 
+        }
+        .login-password-group { 
+            position: relative; 
+        }
+        .login-toggle-password { 
+            position: absolute; 
+            left: 16px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background: none; 
+            border: none; 
+            color: #9ca3af; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+        }
+        .login-forgot-password { 
+            text-align: left; 
+            margin-bottom: 25px; 
+        }
+        .login-forgot-password a { 
+            color: #2ECC71; 
+            text-decoration: none; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+        }
+        .login-btn-login { 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(135deg, #2ECC71, #27AE60); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(46,204,113,0.3); 
+        }
+        .login-btn-login:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(46,204,113,0.4); 
+        }
+        .login-divider { 
+            display: flex; 
+            align-items: center; 
+            margin: 25px 0; 
+            color: #9ca3af; 
+            font-size: 0.85rem; 
+        }
+        .login-divider::before, 
+        .login-divider::after { 
+            content: ''; 
+            flex: 1; 
+            height: 1px; 
+            background: #e5e7eb; 
+        }
+        .login-divider span { 
+            padding: 0 15px; 
+        }
+        .login-btn-google { 
+            width: 100%; 
+            padding: 14px; 
+            background: white; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            color: #374151; 
+            margin-bottom: 15px; 
+        }
+        .login-btn-google:hover { 
+            background: #f9fafb; 
+        }
+        .login-btn-guest { 
+            width: 100%; 
+            padding: 14px; 
+            background: #f3f4f6; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: #6b7280; 
+        }
+        .login-error-message { 
+            background: #fee2e2; 
+            border: 2px solid #ef4444; 
+            color: #991b1b; 
+            padding: 12px 16px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            font-size: 0.9rem; 
+            display: none; 
+        }
+        .signup-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        /* ===== SIGNUP PAGE ===== */
+        #signupPage {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100001;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        #signupPage.active {
+            display: flex;
+        }
+        
+        .signup-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 440px;
+            width: 100%;
+            padding: 40px 35px;
+            animation: slideUpLogin 0.5s ease;
+            margin: 20px 0;
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #ef4444;
+        }
+        
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f59e0b;
+        }
+        
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #10b981;
+        }
+        
+        .password-hint {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+        
+        .password-requirements {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0;
+            color: #6b7280;
+        }
+        
+        .requirement.met {
+            color: #10b981;
+        }
+        
+        .requirement .icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .back-to-login {
+            text-align: center;
+            margin-top: 20px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .back-to-login a {
+            color: #2ECC71;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        
+        .back-to-login a:hover {
+            text-decoration: underline;
+        }
+
+        .signup-link a {
+            color: #2ECC71;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 440px;
+            width: 100%;
+            padding: 40px 35px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+        }
+
+        .logo svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 12px rgba(46,204,113,0.3));
+        }
+
+        .steam-anim {
+            animation: steamFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes steamFloat {
+            0%, 100% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 0.8; transform: translateY(-8px); }
+        }
+
+        .app-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2ECC71;
+            margin-bottom: 8px;
+        }
+
+        .app-tagline {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-text h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2ECC71;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(46,204,113,0.1);
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+        }
+
+        body.ltr .toggle-password {
+            left: auto;
+            right: 16px;
+        }
+
+        .forgot-password {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        body.ltr .forgot-password {
+            text-align: right;
+        }
+
+        .forgot-password a {
+            color: #2ECC71;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2ECC71, #27AE60);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46,204,113,0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            padding: 0 15px;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #374151;
+            margin-bottom: 15px;
+        }
+
+        .btn-google:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .btn-guest {
+            width: 100%;
+            padding: 14px;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6b7280;
+        }
+
+        .btn-guest:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        
+        /* ===== SIGNUP PAGE ===== */
+        #signupPage {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100001;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        #signupPage.active {
+            display: flex;
+        }
+        
+        .signup-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 440px;
+            width: 100%;
+            padding: 40px 35px;
+            animation: slideUpLogin 0.5s ease;
+            margin: 20px 0;
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #ef4444;
+        }
+        
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f59e0b;
+        }
+        
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #10b981;
+        }
+        
+        .password-hint {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+        
+        .password-requirements {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0;
+            color: #6b7280;
+        }
+        
+        .requirement.met {
+            color: #10b981;
+        }
+        
+        .requirement .icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .back-to-login {
+            text-align: center;
+            margin-top: 20px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .back-to-login a {
+            color: #2ECC71;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        
+        .back-to-login a:hover {
+            text-decoration: underline;
+        }
+
+        .signup-link a {
+            color: #2ECC71;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 25px;
+            }
+
+            .app-name {
+                font-size: 1.7rem;
+            }
+
+            .welcome-text h2 {
+                font-size: 1.3rem;
+            }
+        }
+    
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOGIN PAGE ===== -->
+    <div id="loginPage">
+        <div class="login-container">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <div class="logo">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Tagine body -->
+                    <path d="M 50 140 Q 100 50 150 140 Z" fill="#2ECC71" opacity="0.95"/>
+                    <!-- Base -->
+                    <ellipse cx="100" cy="145" rx="60" ry="12" fill="#27AE60" opacity="0.9"/>
+                    <!-- Knob -->
+                    <circle cx="100" cy="55" r="8" fill="#2ECC71" opacity="0.95"/>
+                    <!-- Steam -->
+                    <g class="steam-anim">
+                        <path d="M 85 35 Q 83 25 85 18" stroke="white" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                        <path d="M 100 30 Q 98 20 100 12" stroke="white" stroke-width="3.5" fill="none" opacity="0.8" stroke-linecap="round"/>
+                        <path d="M 115 35 Q 113 25 115 18" stroke="white" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                    </g>
+                </svg>
+            </div>
+            <h1 class="app-name">SahaSnap</h1>
+            <p class="app-tagline">صحتك في لقطة واحدة</p>
+        </div>
+
+        <!-- Welcome Text -->
+        <div class="welcome-text">
+            <h2>مرحباً بك!</h2>
+            <p>سجّل دخولك للمتابعة</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label" for="email">البريد الإلكتروني</label>
+                <input 
+                    type="email" 
+                    id="loginEmail" 
+                    class="form-input" 
+                    placeholder="name@example.com"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label class="form-label" for="password">كلمة المرور</label>
+                <div class="password-group">
+                    <input 
+                        type="password" 
+                        id="loginPassword" 
+                        class="form-input" 
+                        placeholder="••••••••"
+                        required
+                    >
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        👁️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="forgot-password">
+                <a href="#" onclick="forgotPassword(); return false;">نسيت كلمة المرور؟</a>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" class="btn-login">
+                تسجيل الدخول
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+            <span>أو</span>
+        </div>
+
+        <!-- Google Login -->
+        <button class="btn-google" onclick="loginWithGoogle()">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M19.6 10.227c0-.709-.064-1.39-.182-2.045H10v3.868h5.382a4.6 4.6 0 01-1.996 3.018v2.51h3.232c1.891-1.742 2.982-4.305 2.982-7.35z" fill="#4285F4"/>
+                <path d="M10 20c2.7 0 4.964-.895 6.618-2.423l-3.232-2.509c-.895.6-2.04.955-3.386.955-2.605 0-4.81-1.76-5.595-4.123H1.064v2.59A9.996 9.996 0 0010 20z" fill="#34A853"/>
+                <path d="M4.405 11.9c-.2-.6-.314-1.24-.314-1.9 0-.66.114-1.3.314-1.9V5.51H1.064A9.996 9.996 0 000 10c0 1.614.386 3.14 1.064 4.49l3.34-2.59z" fill="#FBBC05"/>
+                <path d="M10 3.977c1.468 0 2.786.505 3.823 1.496l2.868-2.868C14.959.99 12.695 0 10 0 6.09 0 2.71 2.24 1.064 5.51l3.34 2.59C5.19 5.736 7.395 3.977 10 3.977z" fill="#EA4335"/>
+            </svg>
+            تسجيل الدخول بحساب Google
+        </button>
+
+        <!-- Guest Login -->
+        <button class="btn-guest" onclick="guestLogin()">
+            🚀 تجربة التطبيق بدون تسجيل
+        </button>
+
+        <!-- Signup Link -->
+        <div class="signup-link">
+            ليس لديك حساب؟ <a href="#" onclick="createAccount(); return false;">إنشاء حساب جديد</a>
+        </div>
+    </div>
+    </div> <!-- END loginPage -->
+
+    <!-- ===== SIGNUP PAGE ===== -->
+    <div id="signupPage">
+        <div class="signup-container">
+            <div class="login-logo-section">
+                <div class="login-logo">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 50 140 Q 100 50 150 140 Z" fill="#2ECC71" opacity="0.95"/>
+                        <ellipse cx="100" cy="145" rx="60" ry="12" fill="#27AE60" opacity="0.9"/>
+                        <circle cx="100" cy="55" r="8" fill="#2ECC71" opacity="0.95"/>
+                        <g class="steam-anim">
+                            <path d="M 85 35 Q 83 25 85 18" stroke="white" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                            <path d="M 100 30 Q 98 20 100 12" stroke="white" stroke-width="3.5" fill="none" opacity="0.8" stroke-linecap="round"/>
+                            <path d="M 115 35 Q 113 25 115 18" stroke="white" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <h1 class="login-app-name">SahaSnap</h1>
+                <p class="login-tagline">صحتك في لقطة واحدة</p>
+            </div>
+            
+            <div class="welcome-text">
+                <h2>إنشاء حساب جديد</h2>
+                <p>انضم إلينا وابدأ رحلتك الصحية</p>
+            </div>
+            
+            <div class="login-error-message" id="signupError"></div>
+            
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <!-- Name -->
+                <div class="login-form-group">
+                    <label class="login-form-label">الاسم الكامل</label>
+                    <input type="text" id="signupName" class="login-form-input" placeholder="أحمد محمد" required minlength="3">
+                </div>
+                
+                <!-- Email -->
+                <div class="login-form-group">
+                    <label class="login-form-label">البريد الإلكتروني</label>
+                    <input type="email" id="signupEmail" class="login-form-input" placeholder="name@example.com" required>
+                </div>
+                
+                <!-- Password -->
+                <div class="login-form-group">
+                    <label class="login-form-label">كلمة المرور</label>
+                    <div class="login-password-group">
+                        <input type="password" id="signupPassword" class="login-form-input" placeholder="••••••••" required minlength="8" oninput="checkPasswordStrength()">
+                        <button type="button" class="login-toggle-password" onclick="toggleSignupPassword('signupPassword')">👁️</button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                    <div class="password-requirements">
+                        <div class="requirement" id="req-length">
+                            <span class="icon">○</span>
+                            <span>8 أحرف على الأقل</span>
+                        </div>
+                        <div class="requirement" id="req-upper">
+                            <span class="icon">○</span>
+                            <span>حرف كبير واحد على الأقل</span>
+                        </div>
+                        <div class="requirement" id="req-lower">
+                            <span class="icon">○</span>
+                            <span>حرف صغير واحد على الأقل</span>
+                        </div>
+                        <div class="requirement" id="req-number">
+                            <span class="icon">○</span>
+                            <span>رقم واحد على الأقل</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confirm Password -->
+                <div class="login-form-group">
+                    <label class="login-form-label">تأكيد كلمة المرور</label>
+                    <div class="login-password-group">
+                        <input type="password" id="signupPasswordConfirm" class="login-form-input" placeholder="••••••••" required>
+                        <button type="button" class="login-toggle-password" onclick="toggleSignupPassword('signupPasswordConfirm')">👁️</button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn-login">إنشاء الحساب</button>
+            </form>
+            
+            <div class="back-to-login">
+                لديك حساب بالفعل؟ <a href="#" onclick="showLoginFromSignup(); return false;">تسجيل الدخول</a>
+            </div>
+        </div>
+    </div>
+
+
+
+        <!-- Firebase SDK -->
+    
+
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash" style="display:none;">
+        <div class="splash-logo">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 50 140 Q 100 50 150 140 Z" fill="white" opacity="0.95"/>
+                <ellipse cx="100" cy="145" rx="60" ry="12" fill="white" opacity="0.9"/>
+                <circle cx="100" cy="55" r="8" fill="white" opacity="0.95"/>
+                <g class="steam-1">
+                    <path d="M 85 35 Q 83 25 85 18" stroke="white" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                </g>
+                <g class="steam-2">
+                    <path d="M 100 30 Q 98 20 100 12" stroke="white" stroke-width="3.5" fill="none" opacity="0.8" stroke-linecap="round"/>
+                </g>
+                <g class="steam-3">
+                    <path d="M 115 35 Q 113 25 115 18" stroke="white" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+                </g>
+            </svg>
+        </div>
+        
+        <h1 class="splash-title">SahaSnap</h1>
+        <p class="splash-tagline">صحتك في لقطة واحدة</p>
+        <div class="splash-loader"></div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeLang()"></div>
+
+    <!-- SUBSCRIPTION MODAL -->
+    <div class="sub-modal" id="subModal">
+        <div class="sub-content">
+            <button class="sub-close" onclick="closeSubModal()">✕</button>
+            
+            <div class="sub-icon">🔒</div>
+            <h2 class="sub-title" id="subTitle">انتهت محاولاتك المجانية</h2>
+            <p class="sub-message" id="subMessage">اشترك الآن للحصول على تحليلات غير محدودة ومميزات حصرية</p>
+            
+            <div class="sub-plans">
+                <!-- Monthly Plan -->
+                <div class="plan-card" id="planMonthly" onclick="selectPlan('monthly')">
+                    <div class="plan-header">
+                        <span class="plan-name" id="planMonthlyName">شهري</span>
+                        <span class="plan-price">$2.99<small id="planMonthlyPer">/شهر</small></span>
+                    </div>
+                    <p class="plan-desc" id="planMonthlyDesc">وصول كامل لمدة شهر واحد</p>
+                </div>
+                
+                <!-- Yearly Plan -->
+                <div class="plan-card selected" id="planYearly" onclick="selectPlan('yearly')">
+                    <span class="plan-badge" id="planBadge">الأفضل 🔥</span>
+                    <div class="plan-header">
+                        <span class="plan-name" id="planYearlyName">سنوي</span>
+                        <span class="plan-price">$32<small id="planYearlyPer">/سنة</small></span>
+                    </div>
+                    <p class="plan-desc" id="planYearlyDesc">وفّر $3.88 مقارنة بالاشتراك الشهري</p>
+                </div>
+            </div>
+            
+            <button class="subscribe-btn" id="subscribeBtn" onclick="subscribe()">
+                <span id="subscribeBtnText">اشترك الآن - $32/سنة</span>
+            </button>
+            
+            <p class="sub-footer" id="subFooter">يمكنك الإلغاء في أي وقت</p>
+        </div>
+    </div>
+
+    <!-- APP BAR -->
+    <div class="app-bar" style="display:none;">
+        <div class="app-bar-title">
+            <svg class="app-bar-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 50 140 Q 100 50 150 140 Z" fill="white" opacity="0.95"/>
+                <ellipse cx="100" cy="145" rx="60" ry="12" fill="white" opacity="0.9"/>
+                <circle cx="100" cy="55" r="8" fill="white" opacity="0.95"/>
+            </svg>
+            <span>SahaSnap</span>
+        </div>
+        <div class="lang-wrapper">
+            <div class="lang-trigger" onclick="toggleLang()">
+                <span>🌐</span>
+                <span class="lang-arrow" id="langArrow">▼</span>
+            </div>
+            <div class="lang-dropdown" id="langDropdown">
+                <div class="lang-option selected" onclick="setLang('ar')" id="opt-ar"><span>🇸🇦</span><span>العربية</span><span class="lang-check">✓</span></div>
+                <div class="lang-option" onclick="setLang('en')" id="opt-en"><span>🇬🇧</span><span>English</span><span class="lang-check">✓</span></div>
+                <div class="lang-option" onclick="setLang('fr')" id="opt-fr"><span>🇫🇷</span><span>Français</span><span class="lang-check">✓</span></div>
+                <div class="lang-option" onclick="setLang('es')" id="opt-es"><span>🇪🇸</span><span>Español</span><span class="lang-check">✓</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE -->
+    <div class="page" style="display:none;">
+        <div class="container">
+
+            <div class="header">
+                <div class="logo">🍽️ SahaSnap</div>
+                <div class="tagline" id="tagline">اكتشف إذا كانت وجبتك مناسبة لصحتك</div>
+            </div>
+
+
+                <!-- Email Verification Warning -->
+                <div class="email-warning-banner" id="emailWarningBanner">
+                    <div class="email-warning-icon">⚠️</div>
+                    <div class="email-warning-content">
+                        <div class="email-warning-title">يرجى تفعيل حسابك</div>
+                        <div class="email-warning-text">تم إرسال رسالة تفعيل إلى بريدك الإلكتروني. يرجى التحقق من بريدك لتفعيل الحساب.</div>
+                    </div>
+                    <button class="email-warning-btn" onclick="resendVerificationEmail()">إعادة الإرسال</button>
+                    <button class="email-warning-close" onclick="closeEmailWarning()">✕</button>
+                </div>
+
+            <div class="card">
+
+                <!-- STEP 1: CONDITION -->
+                <div class="section">
+                    <div class="cond-label-row">
+                        <span class="cond-label-text" id="condLabel">اختر حالتك الصحية:</span>
+                    </div>
+
+                    <div id="noneContainer"></div>
+                    <div class="condition-grid" id="condGrid"></div>
+
+                    <div class="athlete-card" id="athleteCard">
+                        <button class="athlete-btn" id="athleteBtn" onclick="toggleAthlete()">
+                            <span class="athlete-label" id="athleteLabel">رياضي / كمال الأجسام</span>
+                            <span class="athlete-arrow" id="athleteArrow">▼</span>
+                        </button>
+                        <div class="athlete-sub" id="athleteSub">
+                            <button class="sub-btn" id="subBulk" onclick="selectSub('bulk')">
+                                <span id="bulkLabel">تضخيم</span>
+                                <small style="display:block;opacity:0.7;font-size:0.75rem">Bulking</small>
+                            </button>
+                            <button class="sub-btn" id="subCut" onclick="selectSub('cut')">
+                                <span id="cutLabel">تنشيف</span>
+                                <small style="display:block;opacity:0.7;font-size:0.75rem">Cutting</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: CAMERA ONLY (NO GALLERY) -->
+                <div class="section">
+                    <button class="camera-btn" id="cameraBtn" onclick="openCamera()">
+                        📸 <span id="cameraBtnText">صوّر وجبتك الآن</span>
+                    </button>
+                    <input type="file" id="imageInput" accept="image/*" capture="environment">
+                </div>
+
+                <!-- STEP 3: PREVIEW -->
+                <div class="preview" id="preview">
+                    <button class="remove-img" onclick="removeImage()">✕</button>
+                    <img id="previewImg" src="" alt="">
+                </div>
+
+                <!-- STEP 4: HIDDEN INGREDIENTS -->
+                <div class="ingredients-section" id="ingredientsSection">
+                    <div class="ingredients-card">
+                        <div class="ingredients-top">
+                            <span style="font-size:1.3rem">🧂</span>
+                            <span class="ingredients-title" id="ingTitle">هل توجد مكونات غير ظاهرة في الصورة؟</span>
+                            <span class="optional-badge" id="ingBadge">اختياري</span>
+                        </div>
+                        <textarea class="ingredients-textarea" id="ingInput"
+                            placeholder="مثال: تم إضافة سكر، زيت إضافي، صلصة، ملح كثير..."></textarea>
+                        <button class="why-btn" onclick="toggleWhy()">
+                            <span>💡</span>
+                            <span id="whyBtnText">لماذا نطلب هذه المعلومات؟</span>
+                        </button>
+                        <div class="why-tooltip" id="whyTooltip">
+                            <span id="whyMsg">🔍 بعض المكونات مثل السكر أو الزيت قد لا تكون ظاهرة في الصورة.</span>
+                        </div>
+                    </div>
+                    <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">✨ حلل الوجبة</button>
+                </div>
+
+                <!-- ERROR -->
+                <div class="error-box" id="errorBox"></div>
+
+                <!-- LOADING -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div id="loadingText">جاري التحليل...</div>
+                </div>
+
+                <!-- RESULTS -->
+                <div class="results" id="results">
+                    <div class="result-card" id="resultCard">
+                        <div class="status" id="statusEl"></div>
+                        <div class="info-box">
+                            <div class="info-label" id="reasonLabel">السبب:</div>
+                            <div class="info-text" id="reasonText"></div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label" id="alertLabel">تنبيه شخصي:</div>
+                            <div class="info-text" id="alertText"></div>
+                        </div>
+                        <div id="ingUsedTag"></div>
+                    </div>
+                    <button class="retry-btn" id="retryBtn" onclick="reset()">🔄 تحليل وجبة أخرى</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+    var API_KEY = 'AIzaSyDHXuTSXXh8VOY5JRWW3GVYdMorAaVRCSA';
+
+
+
+    // ===== EMAIL VERIFICATION BANNER =====
+    function checkAndShowEmailWarning() {
+        var shouldShow = localStorage.getItem('showEmailWarning');
+        var user = window.firebaseAuth.currentUser;
+        
+        if (shouldShow === 'true' && user && !user.emailVerified && !user.isAnonymous) {
+            document.getElementById('emailWarningBanner').classList.add('show');
+        }
+    }
+    
+    function closeEmailWarning() {
+        document.getElementById('emailWarningBanner').classList.remove('show');
+        localStorage.removeItem('showEmailWarning');
+    }
+    
+
+
+    function resendVerificationEmail() {
+        var user = window.firebaseAuth.currentUser;
+        
+        if (!user) {
+            alert('خطأ: المستخدم غير موجود');
+            return;
+        }
+        
+        var btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'جاري الإرسال...';
+        
+        window.sendEmailVerification(user)
+            .then(function() {
+                alert('✓ تم إرسال رسالة التفعيل مرة أخرى. يرجى التحقق من بريدك الإلكتروني.');
+                btn.disabled = false;
+                btn.textContent = 'إعادة الإرسال';
+            })
+            .catch(function(error) {
+                console.error('Resend error:', error);
+                alert('خطأ في إرسال الرسالة. حاول مرة أخرى لاحقاً.');
+                btn.disabled = false;
+                btn.textContent = 'إعادة الإرسال';
+            });
+    }
+
+    // ===== PAGE NAVIGATION =====
+    function showLogin() {
+        document.getElementById('loginPage').classList.remove('hidden');
+        document.getElementById('splash').style.display = 'none';
+        document.querySelector('.app-bar').style.display = 'none';
+        document.querySelector('.page').style.display = 'none';
+    }
+
+    function showApp() {
+        // Hide login
+        document.getElementById('loginPage').classList.add('hidden');
+        
+        // Show splash
+        var splash = document.getElementById('splash');
+        splash.style.display = 'flex';
+        
+        // After 2.8s hide splash and show app
+        setTimeout(function() {
+            splash.classList.add('hide');
+            setTimeout(function() {
+                splash.style.display = 'none';
+                document.querySelector('.app-bar').style.display = 'flex';
+                document.querySelector('.page').style.display = 'block';
+                
+                // Initialize app
+                if (typeof init === 'function') {
+                    init();
+                }
+            }, 800);
+        }, 2800);
+    }
+
+    // ===== LOGIN FUNCTIONS =====
+    function toggleLoginPassword() {
+        var input = document.getElementById('loginEmail').nextElementSibling.querySelector('input');
+        var btn = document.querySelector('.login-toggle-password');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        var email = document.getElementById('loginEmail').value;
+        var password = document.getElementById('loginPassword').value;
+        var btn = event.target.querySelector('.login-btn-login');
+        
+        btn.disabled = true;
+        btn.textContent = 'جاري تسجيل الدخول...';
+        
+        window.signInWithEmailAndPassword(window.firebaseAuth, email, password)
+            .then(function(userCredential) {
+                var user = userCredential.user;
+                console.log('Login successful:', user.uid);
+                
+                // Check if email is verified (warning only, don't block)
+                if (!user.emailVerified && !user.isAnonymous) {
+                    // Email not verified - show warning but allow access
+                    console.log('⚠️ Email not verified');
+                    
+                    // Store warning to show in app
+                    localStorage.setItem('showEmailWarning', 'true');
+                } else {
+                    // Email verified or anonymous
+                    console.log('✓ Email verified or anonymous login');
+                }
+                
+                // User will be logged in anyway
+                // Firebase onAuthStateChanged will handle the redirect
+            })
+            .catch(function(error) {
+                console.error('Login error:', error);
+                var msg = 'خطأ في تسجيل الدخول';
+                if (error.code === 'auth/user-not-found') msg = 'المستخدم غير موجود';
+                else if (error.code === 'auth/wrong-password') msg = 'كلمة المرور خاطئة';
+                else if (error.code === 'auth/invalid-email') msg = 'البريد الإلكتروني غير صحيح';
+                
+                showLoginError(msg);
+                btn.disabled = false;
+                btn.textContent = 'تسجيل الدخول';
+            });
+    }
+
+    function loginWithGoogle() {
+        window.signInWithPopup(window.firebaseAuth, window.firebaseGoogleProvider)
+            .then(function() {
+                console.log('Google login successful');
+            })
+            .catch(function(error) {
+                console.error('Google error:', error);
+                showLoginError('خطأ في تسجيل الدخول عبر Google');
+            });
+    }
+
+    function guestLogin() {
+        window.signInAnonymously(window.firebaseAuth)
+            .then(function() {
+                console.log('Guest login successful');
+            })
+            .catch(function(error) {
+                console.error('Guest error:', error);
+                showLoginError('خطأ في الدخول كزائر');
+            });
+    }
+
+    function forgotPassword() {
+        var email = prompt('أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور:');
+        if (email) {
+            window.sendPasswordResetEmail(window.firebaseAuth, email)
+                .then(function() {
+                    showLoginSuccess('تم إرسال رابط إعادة التعيين إلى ' + email);
+                })
+                .catch(function(error) {
+                    console.error('Password reset error:', error);
+                    showLoginError('خطأ في إرسال الرابط');
+                });
+        }
+    }
+
+    function showLoginError(msg) {
+        var box = document.getElementById('loginError');
+        box.textContent = msg;
+        box.style.display = 'block';
+        box.style.background = '#fee2e2';
+        box.style.borderColor = '#ef4444';
+        box.style.color = '#991b1b';
+        setTimeout(function() {
+            box.style.display = 'none';
+        }, 5000);
+    }
+
+
+
+    // ===== SIGNUP FUNCTIONS =====
+    function createAccount() {
+        // إخفاء login وإظهار signup
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('signupPage').classList.add('active');
+    }
+    
+    function showLoginFromSignup() {
+        document.getElementById('signupPage').classList.remove('active');
+        document.getElementById('loginPage').classList.remove('hidden');
+    }
+    
+    function toggleSignupPassword(inputId) {
+        var input = document.getElementById(inputId);
+        var btn = input.nextElementSibling;
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+    
+    function checkPasswordStrength() {
+        var password = document.getElementById('signupPassword').value;
+        var strengthBar = document.getElementById('passwordStrengthBar');
+        
+        // Requirements
+        var hasLength = password.length >= 8;
+        var hasUpper = /[A-Z]/.test(password);
+        var hasLower = /[a-z]/.test(password);
+        var hasNumber = /[0-9]/.test(password);
+        
+        // Update UI
+        updateRequirement('req-length', hasLength);
+        updateRequirement('req-upper', hasUpper);
+        updateRequirement('req-lower', hasLower);
+        updateRequirement('req-number', hasNumber);
+        
+        // Calculate strength
+        var strength = 0;
+        if (hasLength) strength++;
+        if (hasUpper) strength++;
+        if (hasLower) strength++;
+        if (hasNumber) strength++;
+        
+        // Update bar
+        strengthBar.className = 'password-strength-bar';
+        if (strength <= 2) {
+            strengthBar.classList.add('weak');
+        } else if (strength === 3) {
+            strengthBar.classList.add('medium');
+        } else if (strength === 4) {
+            strengthBar.classList.add('strong');
+        }
+        
+        return strength >= 4;
+    }
+    
+    function updateRequirement(id, met) {
+        var el = document.getElementById(id);
+        if (met) {
+            el.classList.add('met');
+            el.querySelector('.icon').textContent = '✓';
+        } else {
+            el.classList.remove('met');
+            el.querySelector('.icon').textContent = '○';
+        }
+    }
+    
+    async function handleSignup(event) {
+        event.preventDefault();
+        
+        var name = document.getElementById('signupName').value.trim();
+        var email = document.getElementById('signupEmail').value.trim();
+        var password = document.getElementById('signupPassword').value;
+        var confirmPassword = document.getElementById('signupPasswordConfirm').value;
+        var btn = event.target.querySelector('.login-btn-login');
+        
+        // Validation
+        if (password !== confirmPassword) {
+            showSignupError('كلمات المرور غير متطابقة');
+            return;
+        }
+        
+        if (!checkPasswordStrength()) {
+            showSignupError('كلمة المرور يجب أن تحقق جميع المتطلبات');
+            return;
+        }
+        
+        // Disable button
+        btn.disabled = true;
+        btn.textContent = 'جاري إنشاء الحساب...';
+        
+        try {
+            // 1. Create user in Firebase Auth
+            const userCredential = await window.createUserWithEmailAndPassword(
+                window.firebaseAuth, 
+                email, 
+                password
+            );
+            
+            const user = userCredential.user;
+            console.log('User created:', user.uid);
+            
+            // 2. Update profile with name
+            await window.updateProfile(user, {
+                displayName: name
+            });
+            
+            // 3. Send email verification
+            await window.sendEmailVerification(user);
+            
+            // 4. Save user data in Firestore
+            if (window.firestoreSetDoc && window.firestoreDoc && window.firebaseDb) {
+                await window.firestoreSetDoc(
+                    window.firestoreDoc(window.firebaseDb, 'users', user.uid),
+                    {
+                        name: name,
+                        email: email,
+                        createdAt: Date.now(),
+                        emailVerified: false,
+                        trials: {
+                            count: 0,
+                            resetDate: Date.now() + (7 * 24 * 60 * 60 * 1000)
+                        }
+                    }
+                );
+                console.log('User data saved to Firestore');
+            }
+            
+            // Success message
+            showSignupSuccess('تم إنشاء الحساب بنجاح! جاري تحميل التطبيق...');
+            
+            // Clear form
+            document.getElementById('signupForm').reset();
+            document.getElementById('passwordStrengthBar').className = 'password-strength-bar';
+            
+            // User is already signed in, Firebase will trigger onAuthStateChanged
+            // which will call showApp() automatically
+            // No need to manually redirect
+            
+        } catch (error) {
+            console.error('Signup error:', error);
+            
+            var errorMsg = 'حدث خطأ في إنشاء الحساب';
+            if (error.code === 'auth/email-already-in-use') {
+                errorMsg = 'البريد الإلكتروني مستخدم بالفعل';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMsg = 'البريد الإلكتروني غير صحيح';
+            } else if (error.code === 'auth/weak-password') {
+                errorMsg = 'كلمة المرور ضعيفة جداً';
+            } else if (error.code === 'auth/network-request-failed') {
+                errorMsg = 'خطأ في الاتصال بالإنترنت';
+            }
+            
+            showSignupError(errorMsg);
+            
+            // Re-enable button
+            btn.disabled = false;
+            btn.textContent = 'إنشاء الحساب';
+        }
+    }
+    
+    function showSignupError(msg) {
+        var box = document.getElementById('signupError');
+        box.textContent = msg;
+        box.style.display = 'block';
+        box.style.background = '#fee2e2';
+        box.style.borderColor = '#ef4444';
+        box.style.color = '#991b1b';
+        
+        setTimeout(function() {
+            box.style.display = 'none';
+        }, 6000);
+    }
+    
+    function showSignupSuccess(msg) {
+        var box = document.getElementById('signupError');
+        box.textContent = '✓ ' + msg;
+        box.style.display = 'block';
+        box.style.background = '#d1fae5';
+        box.style.borderColor = '#10b981';
+        box.style.color = '#065f46';
+    }
+
+
+    function showLoginSuccess(msg) {
+        var box = document.getElementById('loginError');
+        box.textContent = '✓ ' + msg;
+        box.style.display = 'block';
+        box.style.background = '#d1fae5';
+        box.style.borderColor = '#10b981';
+        box.style.color = '#065f46';
+    }
+
+    // ===== APP CODE CONTINUES BELOW =====
+
+
+    // ===== SUBSCRIPTION SYSTEM =====
+    var TRIAL_LIMIT = 3;
+    var RESET_DAYS = 7;
+    var selectedPlan = 'yearly'; // default
+
+    async function getTrialData() {
+        if (!window.currentUserId) {
+            return { count: 0, resetDate: Date.now() + (RESET_DAYS * 24 * 60 * 60 * 1000) };
+        }
+        
+        try {
+            const userDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firebaseDb, 'users', window.currentUserId));
+            
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                return data.trials || { count: 0, resetDate: Date.now() + (RESET_DAYS * 24 * 60 * 60 * 1000) };
+            } else {
+                return { count: 0, resetDate: Date.now() + (RESET_DAYS * 24 * 60 * 60 * 1000) };
+            }
+        } catch (error) {
+            console.error('Error getting trial data:', error);
+            return { count: 0, resetDate: Date.now() + (RESET_DAYS * 24 * 60 * 60 * 1000) };
+        }
+    }
+
+    async function saveTrialData(data) {
+        if (!window.currentUserId) {
+            console.log('No user ID - cannot save');
+            return;
+        }
+        
+        try {
+            await window.firestoreSetDoc(
+                window.firestoreDoc(window.firebaseDb, 'users', window.currentUserId),
+                { trials: data },
+                { merge: true }
+            );
+            console.log('Trial data saved to Firestore');
+        } catch (error) {
+            console.error('Error saving trial data:', error);
+        }
+    }
+
+    async function isSubscribed() {
+        if (!window.currentUserId) return false;
+        
+        try {
+            const userDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firebaseDb, 'users', window.currentUserId));
+            
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                if (data.subscription) {
+                    return Date.now() < data.subscription.expiresAt;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking subscription:', error);
+        }
+        
+        return false;
+    }
+
+    async function checkAndResetTrials() {
+        var data = await getTrialData();
+        if (Date.now() >= data.resetDate) {
+            // Reset trials after 7 days
+            data.count = 0;
+            data.resetDate = Date.now() + (RESET_DAYS * 24 * 60 * 60 * 1000);
+            await saveTrialData(data);
+        }
+        return data;
+    }
+
+    async function canAnalyze() {
+        if (await isSubscribed()) return true;
+        var data = await checkAndResetTrials();
+        return data.count < TRIAL_LIMIT;
+    }
+
+    function useOneTrial() {
+        if (isSubscribed()) return true;
+        var data = checkAndResetTrials();
+        if (data.count >= TRIAL_LIMIT) return false;
+        data.count++;
+        saveTrialData(data);
+
+        return true;
+    }
+
+
+
+    function openSubModal() {
+        document.getElementById('subModal').classList.add('show');
+    }
+
+    function closeSubModal() {
+        document.getElementById('subModal').classList.remove('show');
+    }
+
+    function selectPlan(plan) {
+        selectedPlan = plan;
+        document.getElementById('planMonthly').classList.toggle('selected', plan === 'monthly');
+        document.getElementById('planYearly').classList.toggle('selected', plan === 'yearly');
+        
+        var btnText = plan === 'monthly' ? 
+            (T[lang].subscribeBtnMonthly || 'اشترك الآن - $2.99/شهر') :
+            (T[lang].subscribeBtnYearly || 'اشترك الآن - $32/سنة');
+        document.getElementById('subscribeBtnText').textContent = btnText;
+    }
+
+    function subscribe() {
+        // In real app, integrate with Stripe/PayPal/etc
+        // For now, just simulate subscription
+        alert('سيتم دمج بوابة الدفع هنا (Stripe/PayPal)');
+        
+        // Simulate successful payment
+        var duration = selectedPlan === 'monthly' ? 30 : 365;
+        var expiresAt = Date.now() + (duration * 24 * 60 * 60 * 1000);
+        closeSubModal();
+    }
+
+    // ===== TRANSLATIONS =====
+    var T = {
+        ar: {
+            tagline: 'اكتشف إذا كانت وجبتك مناسبة لصحتك',
+            condLabel: 'اختر حالتك الصحية:',
+            cameraBtnText: 'صوّر وجبتك الآن',
+            ingTitle: 'هل توجد مكونات غير ظاهرة في الصورة؟',
+            ingBadge: 'اختياري',
+            ingPlaceholder: 'مثال: تم إضافة سكر، زيت إضافي، صلصة، ملح كثير...',
+            whyBtnText: 'لماذا نطلب هذه المعلومات؟',
+            whyMsg: '🔍 بعض المكونات مثل السكر أو الزيت قد لا تكون ظاهرة في الصورة.',
+            analyzeBtn: '✨ حلل الوجبة',
+            loadingText: 'جاري تحليل وجبتك...',
+            reasonLabel: 'السبب:',
+            alertLabel: 'تنبيه شخصي:',
+            retryBtn: '🔄 تحليل وجبة أخرى',
+            athleteLabel: 'رياضي / كمال الأجسام',
+            bulkLabel: 'تضخيم', cutLabel: 'تنشيف',
+            statusH: '✅ صحية', statusM: '⚠️ متوسطة', statusU: '❌ غير صحية',
+            ingUsed: '🧂 تم أخذ المكونات المخفية بعين الاعتبار',
+            errKey: 'يرجى إضافة API Key في الكود',
+            errPhoto: 'يرجى تصوير الوجبة أولاً',
+            errCond: 'يرجى اختيار حالتك الصحية أولاً',
+            errFail: 'حدث خطأ في التحليل، حاول مجدداً',
+            noFoodDetected: '⚠️ لم يتم التعرف على طعام في الصورة. يرجى رفع صورة واضحة لوجبة أو طبق طعام.',
+            trialsRemaining: '{n} محاولات متبقية',
+            subscribed: '⭐ مشترك',
+            subTitle: 'انتهت محاولاتك المجانية',
+            subMessage: 'اشترك الآن للحصول على تحليلات غير محدودة ومميزات حصرية',
+            planMonthlyName: 'شهري',
+            planMonthlyPer: '/شهر',
+            planMonthlyDesc: 'وصول كامل لمدة شهر واحد',
+            planYearlyName: 'سنوي',
+            planYearlyPer: '/سنة',
+            planYearlyDesc: 'وفّر $3.88 مقارنة بالاشتراك الشهري',
+            planBadge: 'الأفضل 🔥',
+            subscribeBtnMonthly: 'اشترك الآن - $2.99/شهر',
+            subscribeBtnYearly: 'اشترك الآن - $32/سنة',
+            subFooter: 'يمكنك الإلغاء في أي وقت',
+            conditions: [
+                { key:'none', label:'لا شيء (بصحة جيدة)' },
+                { key:'diabetes', label:'السكري' },
+                { key:'htn', label:'ضغط الدم المرتفع' },
+                { key:'chol', label:'ارتفاع الكوليسترول' },
+                { key:'digestive', label:'الجهاز الهضمي' },
+                { key:'ibs', label:'القولون العصبي' },
+                { key:'obesity', label:'السمنة' }
+            ],
+            prompt: function(cond, sub, ing) {
+                var p = 'أنت خبير تغذية. ';
+                p += 'أولاً: تأكد من أن الصورة تحتوي على طعام. إذا لم تحتوي على طعام، أجب فقط: NO_FOOD\n';
+                p += 'ثانياً: إذا كانت الصورة تحتوي على طعام، حلل الوجبة';
+                if (cond && cond !== 'لا شيء (بصحة جيدة)') {
+                    p += ' للشخص الذي لديه: ' + cond;
+                } else {
+                    p += ' للشخص السليم';
+                }
+                if (sub) p += ' - ' + sub;
+                if (ing) p += '. المكونات الإضافية: ' + ing;
+                p += '.\n\n';
+                p += 'المطلوب: أعطني النتيجة بصيغة JSON فقط بدون أي نص إضافي أو markdown أو نجوم.\n';
+                p += 'الصيغة المطلوبة:\n';
+                p += '{\n';
+                p += '  "rating": "صحية" أو "متوسطة" أو "غير صحية",\n';
+                p += '  "reason": "سبب مختصر في جملة واحدة",\n';
+                p += '  "personalAdvice": "نصيحة شخصية مخصصة حسب الحالة الصحية في جملة واحدة"\n';
+                p += '}\n\n';
+                p += 'مهم: أرجع JSON فقط، بدون ```json أو أي تنسيق آخر.';
+                return p;
+            }
+        },
+        en: {
+            tagline: 'Discover if your meal suits your health',
+            condLabel: 'Choose your health condition:',
+            cameraBtnText: 'Take Photo Now',
+            ingTitle: 'Hidden ingredients not visible?',
+            ingBadge: 'Optional',
+            ingPlaceholder: 'Example: added sugar, extra oil, sauce...',
+            whyBtnText: 'Why do we ask this?',
+            whyMsg: '🔍 Some ingredients may not be visible in the photo.',
+            analyzeBtn: '✨ Analyze Meal',
+            loadingText: 'Analyzing...',
+            reasonLabel: 'Reason:',
+            alertLabel: 'Alert:',
+            retryBtn: '🔄 Analyze Another',
+            athleteLabel: 'Athlete / Bodybuilder',
+            bulkLabel: 'Bulking', cutLabel: 'Cutting',
+            statusH: '✅ Healthy', statusM: '⚠️ Moderate', statusU: '❌ Unhealthy',
+            ingUsed: '🧂 Hidden ingredients considered',
+            errKey: 'Add API Key',
+            errPhoto: 'Take a photo first',
+            errCond: 'Select condition first',
+            errFail: 'Analysis failed',
+            noFoodDetected: '⚠️ No food detected in the image. Please upload a clear photo of a meal or dish.',
+            trialsRemaining: '{n} trials left',
+            subscribed: '⭐ Subscribed',
+            subTitle: 'Free Trials Expired',
+            subMessage: 'Subscribe for unlimited analyses and exclusive features',
+            planMonthlyName: 'Monthly',
+            planMonthlyPer: '/mo',
+            planMonthlyDesc: 'Full access for one month',
+            planYearlyName: 'Yearly',
+            planYearlyPer: '/year',
+            planYearlyDesc: 'Save $3.88 vs monthly',
+            planBadge: 'Best Value 🔥',
+            subscribeBtnMonthly: 'Subscribe Now - $2.99/mo',
+            subscribeBtnYearly: 'Subscribe Now - $32/year',
+            subFooter: 'Cancel anytime',
+            conditions: [
+                { key:'none', label:'None (Healthy)' },
+                { key:'diabetes', label:'Diabetes' },
+                { key:'htn', label:'High BP' },
+                { key:'chol', label:'High Cholesterol' },
+                { key:'digestive', label:'Digestive System' },
+                { key:'ibs', label:'IBS (Irritable Bowel)' },
+                { key:'obesity', label:'Obesity' }
+            ],
+            prompt: function(cond, sub, ing) {
+                var p = 'Nutrition expert. ';
+                p += 'First: Check if image contains food. If no food, reply only: NO_FOOD\n';
+                p += 'Second: If food exists, analyze for';
+                if (cond && cond !== 'None (Healthy)') p += ': ' + cond;
+                else p += ' healthy person';
+                if (sub) p += ' - ' + sub;
+                if (ing) p += '. Hidden ingredients: ' + ing;
+                p += '.\n\n';
+                p += 'Required: Return ONLY JSON, no markdown, no stars, no extra text.\n';
+                p += 'Format:\n';
+                p += '{\n';
+                p += '  "rating": "صحية" or "متوسطة" or "غير صحية",\n';
+                p += '  "reason": "brief reason",\n';
+                p += '  "personalAdvice": "personalized advice"\n';
+                p += '}';
+                return p;
+            }
+        },
+        fr: {
+            tagline: 'Découvrez si votre repas convient',
+            condLabel: 'État de santé:',
+            cameraBtnText: 'Photographier',
+            ingTitle: 'Ingrédients cachés?',
+            ingBadge: 'Optionnel',
+            ingPlaceholder: 'Ex: sucre, huile...',
+            whyBtnText: 'Pourquoi?',
+            whyMsg: '🔍 Certains ingrédients invisibles.',
+            analyzeBtn: '✨ Analyser',
+            loadingText: 'Analyse...',
+            reasonLabel: 'Raison:',
+            alertLabel: 'Alerte:',
+            retryBtn: '🔄 Autre repas',
+            athleteLabel: 'Athlète',
+            bulkLabel: 'Masse', cutLabel: 'Sèche',
+            statusH: '✅ Sain', statusM: '⚠️ Modéré', statusU: '❌ Malsain',
+            ingUsed: '🧂 Ingrédients pris en compte',
+            errKey: 'Ajouter clé API',
+            errPhoto: 'Prendre photo',
+            errCond: 'Choisir condition',
+            errFail: 'Erreur',
+            noFoodDetected: '⚠️ Aucun aliment détecté. Veuillez télécharger une photo claire d\'un repas.',
+            trialsRemaining: '{n} essais restants',
+            subscribed: '⭐ Abonné',
+            subTitle: 'Essais gratuits épuisés',
+            subMessage: 'Abonnez-vous pour analyses illimitées',
+            planMonthlyName: 'Mensuel',
+            planMonthlyPer: '/mois',
+            planMonthlyDesc: 'Accès complet 1 mois',
+            planYearlyName: 'Annuel',
+            planYearlyPer: '/an',
+            planYearlyDesc: 'Économisez $3.88',
+            planBadge: 'Meilleur 🔥',
+            subscribeBtnMonthly: 'S\'abonner - $2.99/mois',
+            subscribeBtnYearly: 'S\'abonner - $32/an',
+            subFooter: 'Annulez quand vous voulez',
+            conditions: [
+                { key:'none', label:'Aucun' },
+                { key:'diabetes', label:'Diabète' },
+                { key:'htn', label:'Hypertension' },
+                { key:'chol', label:'Cholestérol' },
+                { key:'digestive', label:'Système Digestif' },
+                { key:'ibs', label:'SII (Côlon Irritable)' },
+                { key:'obesity', label:'Obésité' }
+            ],
+            prompt: function(cond, sub, ing) {
+                var p = 'Expert nutrition. Analysez';
+                if (cond && cond !== 'Aucun') p += ' pour: ' + cond;
+                else p += ' personne saine';
+                if (sub) p += ' - ' + sub;
+                if (ing) p += '. Cachés: ' + ing;
+                p += '. (1) sain/modéré/malsain. (2) Raison. (3) Alerte.';
+                return p;
+            }
+        },
+        es: {
+            tagline: 'Descubre si tu comida es adecuada',
+            condLabel: 'Condición:',
+            cameraBtnText: 'Tomar Foto',
+            ingTitle: '¿Ingredientes ocultos?',
+            ingBadge: 'Opcional',
+            ingPlaceholder: 'Ej: azúcar, aceite...',
+            whyBtnText: '¿Por qué?',
+            whyMsg: '🔍 Algunos ingredientes invisibles.',
+            analyzeBtn: '✨ Analizar',
+            loadingText: 'Analizando...',
+            reasonLabel: 'Razón:',
+            alertLabel: 'Alerta:',
+            retryBtn: '🔄 Otra comida',
+            athleteLabel: 'Atleta',
+            bulkLabel: 'Volumen', cutLabel: 'Definición',
+            statusH: '✅ Saludable', statusM: '⚠️ Moderado', statusU: '❌ No saludable',
+            ingUsed: '🧂 Ingredientes considerados',
+            errKey: 'Agregar clave API',
+            errPhoto: 'Tomar foto',
+            errCond: 'Elegir condición',
+            errFail: 'Error',
+            noFoodDetected: '⚠️ No se detectó comida. Sube una foto clara de una comida.',
+            trialsRemaining: '{n} intentos restantes',
+            subscribed: '⭐ Suscrito',
+            subTitle: 'Intentos gratuitos agotados',
+            subMessage: 'Suscríbete para análisis ilimitados',
+            planMonthlyName: 'Mensual',
+            planMonthlyPer: '/mes',
+            planMonthlyDesc: 'Acceso completo 1 mes',
+            planYearlyName: 'Anual',
+            planYearlyPer: '/año',
+            planYearlyDesc: 'Ahorra $3.88',
+            planBadge: 'Mejor 🔥',
+            subscribeBtnMonthly: 'Suscribir - $2.99/mes',
+            subscribeBtnYearly: 'Suscribir - $32/año',
+            subFooter: 'Cancelar cuando quieras',
+            conditions: [
+                { key:'none', label:'Ninguno' },
+                { key:'diabetes', label:'Diabetes' },
+                { key:'htn', label:'Hipertensión' },
+                { key:'chol', label:'Colesterol' },
+                { key:'digestive', label:'Sistema Digestivo' },
+                { key:'ibs', label:'SII (Colon Irritable)' },
+                { key:'obesity', label:'Obesidad' }
+            ],
+            prompt: function(cond, sub, ing) {
+                var p = 'Experto nutrición. Analiza';
+                if (cond && cond !== 'Ninguno') p += ' para: ' + cond;
+                else p += ' persona saludable';
+                if (sub) p += ' - ' + sub;
+                if (ing) p += '. Ocultos: ' + ing;
+                p += '. (1) saludable/moderado/no saludable. (2) Razón. (3) Alerta.';
+                return p;
+            }
+        }
+    };
+
+    var lang = localStorage.getItem('hc_lang') || 'ar';
+    var selectedCond = 'none';
+    var selectedSub = null;
+    var athleteOpen = false;
+    var whyOpen = false;
+    var imgData = null;
+
+    function init() {
+        checkAndShowEmailWarning();
+        applyLang(lang);
+        buildGrid();
+        markLang(lang);
+
+    }
+
+    function toggleLang() {
+        var d = document.getElementById('langDropdown');
+        var a = document.getElementById('langArrow');
+        var o = document.getElementById('overlay');
+        if (d.classList.contains('open')) { closeLang(); }
+        else { d.classList.add('open'); a.classList.add('open'); o.classList.add('active'); }
+    }
+    function closeLang() {
+        document.getElementById('langDropdown').classList.remove('open');
+        document.getElementById('langArrow').classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
+    }
+    function setLang(l) {
+        lang = l;
+        localStorage.setItem('hc_lang', l);
+        applyLang(l);
+        buildGrid();
+        markLang(l);
+        closeLang();
+
+        whyOpen = false;
+        document.getElementById('whyTooltip').classList.remove('show');
+    }
+    function applyLang(l) {
+        var t = T[l];
+        var rtl = (l === 'ar');
+        document.documentElement.setAttribute('lang', l);
+        document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+        document.body.className = rtl ? '' : 'ltr';
+
+        document.getElementById('tagline').textContent = t.tagline;
+        document.getElementById('condLabel').textContent = t.condLabel;
+        document.getElementById('cameraBtnText').textContent = t.cameraBtnText;
+        document.getElementById('ingTitle').textContent = t.ingTitle;
+        document.getElementById('ingBadge').textContent = t.ingBadge;
+        document.getElementById('ingInput').placeholder = t.ingPlaceholder;
+        document.getElementById('whyBtnText').textContent = t.whyBtnText;
+        document.getElementById('whyMsg').textContent = t.whyMsg;
+        document.getElementById('analyzeBtn').textContent = t.analyzeBtn;
+        document.getElementById('loadingText').textContent = t.loadingText;
+        document.getElementById('reasonLabel').textContent = t.reasonLabel;
+        document.getElementById('alertLabel').textContent = t.alertLabel;
+        document.getElementById('retryBtn').textContent = t.retryBtn;
+        document.getElementById('athleteLabel').textContent = t.athleteLabel;
+        document.getElementById('bulkLabel').textContent = t.bulkLabel;
+        document.getElementById('cutLabel').textContent = t.cutLabel;
+        
+        // Subscription modal
+        document.getElementById('subTitle').textContent = t.subTitle;
+        document.getElementById('subMessage').textContent = t.subMessage;
+        document.getElementById('planMonthlyName').textContent = t.planMonthlyName;
+        document.getElementById('planMonthlyPer').textContent = t.planMonthlyPer;
+        document.getElementById('planMonthlyDesc').textContent = t.planMonthlyDesc;
+        document.getElementById('planYearlyName').textContent = t.planYearlyName;
+        document.getElementById('planYearlyPer').textContent = t.planYearlyPer;
+        document.getElementById('planYearlyDesc').textContent = t.planYearlyDesc;
+        document.getElementById('planBadge').textContent = t.planBadge;
+        document.getElementById('subFooter').textContent = t.subFooter;
+        selectPlan(selectedPlan); // Update button text
+    }
+    function markLang(l) {
+        document.querySelectorAll('.lang-option').forEach(function(el) { el.classList.remove('selected'); });
+        var el = document.getElementById('opt-' + l);
+        if (el) el.classList.add('selected');
+    }
+
+    function buildGrid() {
+        var noneContainer = document.getElementById('noneContainer');
+        var grid = document.getElementById('condGrid');
+        noneContainer.innerHTML = '';
+        grid.innerHTML = '';
+        var conditions = T[lang].conditions;
+
+        conditions.forEach(function(c) {
+            if (c.key === 'none') {
+                var noneBtn = document.createElement('button');
+                noneBtn.className = 'none-btn' + (selectedCond === 'none' ? ' selected' : '');
+                noneBtn.setAttribute('data-key', 'none');
+                noneBtn.innerHTML = '<span class="cond-label">' + c.label + '</span>';
+                noneBtn.onclick = function() { selectCond('none'); };
+                noneContainer.appendChild(noneBtn);
+            } else {
+                var btn = document.createElement('button');
+                btn.className = 'cond-btn' + (selectedCond === c.key ? ' selected' : '');
+                btn.setAttribute('data-key', c.key);
+                btn.innerHTML = '<span class="cond-label">' + c.label + '</span>';
+                btn.onclick = function() { selectCond(c.key); };
+                grid.appendChild(btn);
+            }
+        });
+
+        var aBtn = document.getElementById('athleteBtn');
+        if (selectedCond === 'athlete') {
+            aBtn.classList.add('selected');
+            document.getElementById('athleteCard').classList.add('selected');
+        } else {
+            aBtn.classList.remove('selected');
+            document.getElementById('athleteCard').classList.remove('selected');
+        }
+    }
+
+    function selectCond(key) {
+        athleteOpen = false;
+        selectedSub = null;
+        document.getElementById('athleteSub').classList.remove('open');
+        document.getElementById('athleteArrow').classList.remove('open');
+        document.getElementById('athleteBtn').classList.remove('selected');
+        document.getElementById('athleteCard').classList.remove('selected');
+        document.getElementById('subBulk').classList.remove('selected');
+        document.getElementById('subCut').classList.remove('selected');
+
+        selectedCond = (selectedCond === key) ? null : key;
+
+        var noneBtn = document.querySelector('.none-btn');
+        if (noneBtn) noneBtn.classList.toggle('selected', selectedCond === 'none');
+        document.querySelectorAll('.cond-btn').forEach(function(btn) {
+            btn.classList.toggle('selected', btn.getAttribute('data-key') === selectedCond);
+        });
+    }
+
+    function toggleAthlete() {
+        athleteOpen = !athleteOpen;
+        if (athleteOpen) {
+            selectedCond = null;
+            document.querySelectorAll('.cond-btn').forEach(function(b){ b.classList.remove('selected'); });
+            var noneBtn = document.querySelector('.none-btn');
+            if (noneBtn) noneBtn.classList.remove('selected');
+            
+            document.getElementById('athleteBtn').classList.add('selected');
+            document.getElementById('athleteCard').classList.add('selected');
+            document.getElementById('athleteSub').classList.add('open');
+            document.getElementById('athleteArrow').classList.add('open');
+        } else {
+            selectedCond = null;
+            selectedSub = null;
+            document.getElementById('athleteBtn').classList.remove('selected');
+            document.getElementById('athleteCard').classList.remove('selected');
+            document.getElementById('athleteSub').classList.remove('open');
+            document.getElementById('athleteArrow').classList.remove('open');
+            document.getElementById('subBulk').classList.remove('selected');
+            document.getElementById('subCut').classList.remove('selected');
+        }
+    }
+
+    function selectSub(sub) {
+        selectedSub = (selectedSub === sub) ? null : sub;
+        document.getElementById('subBulk').classList.toggle('selected', selectedSub === 'bulk');
+        document.getElementById('subCut').classList.toggle('selected', selectedSub === 'cut');
+    }
+
+    function toggleWhy() {
+        whyOpen = !whyOpen;
+        document.getElementById('whyTooltip').classList.toggle('show', whyOpen);
+    }
+
+    // Camera only - no gallery
+    function openCamera() {
+        document.getElementById('imageInput').click();
+    }
+
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            var img = new Image();
+            img.onload = function() {
+                // Resize and compress image
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                
+                // Calculate new dimensions (max width 800px)
+                var maxWidth = 800;
+                var width = img.width;
+                var height = img.height;
+                
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw and compress (quality 0.7)
+                ctx.drawImage(img, 0, 0, width, height);
+                imgData = canvas.toDataURL('image/jpeg', 0.7);
+                
+                // Display preview
+                document.getElementById('previewImg').src = imgData;
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('ingredientsSection').style.display = 'block';
+                document.getElementById('analyzeBtn').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('errorBox').style.display = 'none';
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function removeImage() {
+        imgData = null;
+        document.getElementById('imageInput').value = '';
+        document.getElementById('ingInput').value = '';
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('ingredientsSection').style.display = 'none';
+        document.getElementById('analyzeBtn').style.display = 'none';
+        document.getElementById('results').style.display = 'none';
+        whyOpen = false;
+        document.getElementById('whyTooltip').classList.remove('show');
+    }
+
+    function reset() { removeImage(); }
+
+    function showError(msg) {
+        var b = document.getElementById('errorBox');
+        b.textContent = msg;
+        b.style.display = 'block';
+        setTimeout(function() { b.style.display = 'none'; }, 5000);
+    }
+
+    async function analyze() {
+        var t = T[lang];
+        if (API_KEY === 'YOUR_API_KEY_HERE') { showError(t.errKey); return; }
+        if (!selectedCond && !athleteOpen) { showError(t.errCond); return; }
+        if (!imgData) { showError(t.errPhoto); return; }
+
+        // Check subscription/trials
+        const canProceed = await canAnalyze();
+        if (!canProceed) {
+            openSubModal();
+            return;
+        }
+
+        var condName = '';
+        if (athleteOpen) {
+            condName = t.athleteLabel;
+        } else {
+            var found = T[lang].conditions.filter(function(c){ return c.key === selectedCond; });
+            condName = found.length ? found[0].label : selectedCond;
+        }
+
+        var subName = '';
+        if (selectedSub === 'bulk') subName = t.bulkLabel;
+        if (selectedSub === 'cut') subName = t.cutLabel;
+
+        var ing = document.getElementById('ingInput').value.trim();
+        var prompt = t.prompt(condName, subName, ing);
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('ingredientsSection').style.display = 'none';
+        document.getElementById('errorBox').style.display = 'none';
+
+        fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + API_KEY, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { 
+                            inline_data: { 
+                                mime_type: 'image/jpeg', 
+                                data: imgData.split(',')[1] 
+                            } 
+                        }
+                    ]
+                }]
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(async function(data) {
+            console.log('API Response:', data);
+            
+            // Check for errors in response
+            if (data.error) {
+                throw new Error(data.error.message || 'API Error');
+            }
+            
+            // Check if response is valid
+            if (!data || !data.candidates || data.candidates.length === 0) {
+                console.error('Full response:', JSON.stringify(data, null, 2));
+                throw new Error('No candidates in response. Check API key and quota.');
+            }
+            
+            var candidate = data.candidates[0];
+            
+            // Check for blocked content
+            if (candidate.finishReason === 'SAFETY') {
+                throw new Error('Content was blocked by safety filters');
+            }
+            
+            if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
+                console.error('Candidate:', JSON.stringify(candidate, null, 2));
+                throw new Error('No content parts in response');
+            }
+            
+            var text = candidate.content.parts[0].text;
+            
+            if (!text || text.trim() === '') {
+                throw new Error('Empty text in response');
+            }
+            
+            // Save to Firebase Storage & Firestore
+            if (window.currentUserId) {
+                try {
+                    // 1. Upload image to Firebase Storage
+                    const imageRef = window.storageRef(
+                        window.firebaseStorage, 
+                        `analyses/${window.currentUserId}/${Date.now()}.jpg`
+                    );
+                    
+                    await window.uploadString(imageRef, imgData, 'data_url');
+                    const imageUrl = await window.getDownloadURL(imageRef);
+                    console.log('Image uploaded to Storage:', imageUrl);
+                    
+                    // 2. Save analysis to Firestore
+                    const analysisData = {
+                        userId: window.currentUserId,
+                        timestamp: Date.now(),
+                        imageUrl: imageUrl,
+                        condition: condName,
+                        subCondition: subName || null,
+                        ingredients: ing || null,
+                        aiResponse: text,
+                        language: lang
+                    };
+                    
+                    await window.firestoreAddDoc(
+                        window.firestoreCollection(window.firebaseDb, 'analyses'),
+                        analysisData
+                    );
+                    
+                    console.log('Analysis saved to Firestore');
+                } catch (storageError) {
+                    console.error('Error saving to Firebase:', storageError);
+                    // Continue even if storage fails
+                }
+            }
+            
+            // Use one trial AFTER successful analysis
+            await useOneTrial();
+            showResult(text, ing);
+        })
+        .catch(function(error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('ingredientsSection').style.display = 'block';
+            console.error('Analysis error:', error);
+            showError(T[lang].errFail + ' - ' + (error.message || 'Unknown error'));
+        });
+    }
+
+    function showResult(text, ing) {
+        document.getElementById('loading').style.display = 'none';
+        var t = T[lang];
+        
+        // Check if no food detected
+        if (text.trim().toUpperCase().indexOf('NO_FOOD') !== -1 || 
+            text.indexOf('لا تحتوي على طعام') !== -1 ||
+            text.indexOf('لم يتم التعرف') !== -1) {
+            showError(t.noFoodDetected || '⚠️ لم يتم التعرف على طعام في الصورة. يرجى رفع صورة واضحة لوجبة أو طبق طعام.');
+            document.getElementById('ingredientsSection').style.display = 'block';
+            return;
+        }
+        
+        var lower = text.toLowerCase();
+
+        var status = 'moderate', statusText = t.statusM;
+        if (lower.indexOf('unhealthy') !== -1 || text.indexOf('غير صحية') !== -1 ||
+            lower.indexOf('malsain') !== -1 || lower.indexOf('no saludable') !== -1) {
+            status = 'unhealthy'; statusText = t.statusU;
+        } else if (lower.indexOf('healthy') !== -1 || text.indexOf('صحية') !== -1 ||
+                   lower.indexOf('sain') !== -1 || lower.indexOf('saludable') !== -1) {
+            status = 'healthy'; statusText = t.statusH;
+        }
+
+        var lines = text.split('\n').filter(function(l) { return l.trim().length > 0; });
+        var reason = lines[1] || lines[0] || '';
+        var alert = lines[2] || '';
+
+        document.getElementById('resultCard').className = 'result-card ' + status;
+        document.getElementById('statusEl').textContent = statusText;
+        document.getElementById('reasonText').textContent = reason;
+        document.getElementById('alertText').textContent = alert;
+
+        var tag = document.getElementById('ingUsedTag');
+        tag.innerHTML = ing ? '<span class="ing-tag">' + t.ingUsed + '</span>' : '';
+
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('ingInput').value = '';
+    }
+
+
+        // Initialize app with user data
+        async function initWithUser(user) {
+            window.currentUserId = user.uid;
+            console.log('Initializing app for user:', user.uid);
+            
+            // Check if user data exists, create if not
+            try {
+                const userDoc = await window.firestoreGetDoc(
+                    window.firestoreDoc(window.firebaseDb, 'users', user.uid)
+                );
+                
+                if (!userDoc.exists()) {
+                    // Create initial user document
+                    await window.firestoreSetDoc(
+                        window.firestoreDoc(window.firebaseDb, 'users', user.uid),
+                        {
+                            createdAt: Date.now(),
+                            email: user.email || null,
+                            isAnonymous: user.isAnonymous,
+                            trials: {
+                                count: 0,
+                                resetDate: Date.now() + (7 * 24 * 60 * 60 * 1000)
+                            }
+                        }
+                    );
+                    console.log('User document created');
+                }
+                
+                // Initialize the app UI
+                if (typeof init === 'function') {
+                    init();
+                }
+            } catch (error) {
+                console.error('Error initializing user:', error);
+            }
+        }
+        
+        // Make it global so Firebase can call it
+        window.initWithUser = initWithUser;
+
+    // Wait for Firebase auth before calling init()
+    // init() will be called by initWithUser() after authentication
+</script>
+
+<!-- SPLASH SCREEN SCRIPT -->
+<script>
+    (function() {
+        var minTime = 2800;
+        var startTime = Date.now();
+        
+        function hideSplash() {
+            var elapsed = Date.now() - startTime;
+            var remaining = Math.max(0, minTime - elapsed);
+            
+            setTimeout(function() {
+                var splash = document.getElementById('splash');
+                if (splash) {
+                    splash.classList.add('hide');
+                    setTimeout(function() {
+                        splash.style.display = 'none';
+                    }, 800);
+                }
+            }, remaining);
+        }
+        
+        if (document.readyState === 'complete') {
+            hideSplash();
+        } else {
+            window.addEventListener('load', hideSplash);
+        }
+    })();
+</script>
+
+
+
+    <!-- ===== OTP VERIFICATION MODAL ===== -->
+    <div class="otp-modal" id="otpModal">
+        <div class="otp-content">
+            <button class="otp-close" onclick="closeOtpModal()">✕</button>
+            
+            <div class="otp-icon">📧</div>
+            <h2 class="otp-title">تأكيد البريد الإلكتروني</h2>
+            <p class="otp-message">
+                أدخل رمز التحقق المكون من 6 أرقام المرسل إلى<br>
+                <strong id="otpEmailDisplay"></strong>
+            </p>
+            
+            <div class="otp-inputs">
+                <input type="text" class="otp-input" maxlength="1" id="otp1" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeydown(event, 1)">
+                <input type="text" class="otp-input" maxlength="1" id="otp2" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeydown(event, 2)">
+                <input type="text" class="otp-input" maxlength="1" id="otp3" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeydown(event, 3)">
+                <input type="text" class="otp-input" maxlength="1" id="otp4" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeydown(event, 4)">
+                <input type="text" class="otp-input" maxlength="1" id="otp5" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(event, 5)">
+                <input type="text" class="otp-input" maxlength="1" id="otp6" oninput="handleOtpInput(this, 6)" onkeydown="handleOtpKeydown(event, 6)">
+            </div>
+            
+            <button class="otp-verify-btn" id="otpVerifyBtn" onclick="verifyOtp()">
+                تأكيد الرمز
+            </button>
+            
+            <div class="otp-resend">
+                <span id="otpResendText">لم يصلك الرمز؟</span>
+                <button class="otp-resend-btn" id="otpResendBtn" onclick="resendOtp()">
+                    إعادة الإرسال
+                </button>
+                <span class="otp-timer" id="otpTimer" style="display:none;"></span>
+            </div>
+            
+            <div class="otp-alternative">
+                أو يمكنك <button onclick="useEmailLink()">استخدام رابط التفعيل من البريد</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getStorage, ref, uploadString, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzM-ARSoJqJuTfYppUw0lK0JokgpTpIqU",
+            authDomain: "sahasnap-25d48.firebaseapp.com",
+            projectId: "sahasnap-25d48",
+            storageBucket: "sahasnap-25d48.firebasestorage.app",
+            messagingSenderId: "1062840253732",
+            appId: "1:1062840253732:web:b13e6f6a9c5a0b1c4947b1",
+            measurementId: "G-QHXM445H40"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+        const storage = getStorage(app);
+
+        // Make accessible globally
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseGoogleProvider = googleProvider;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signInWithPopup = signInWithPopup;
+        window.sendPasswordResetEmail = sendPasswordResetEmail;
+        window.signInAnonymously = signInAnonymously;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.sendEmailVerification = sendEmailVerification;
+        window.updateProfile = updateProfile;
+        window.firebaseStorage = storage;
+        window.storageRef = ref;
+        window.uploadString = uploadString;
+        window.getDownloadURL = getDownloadURL;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.firestoreDoc = doc;
+        window.firestoreGetDoc = getDoc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreUpdateDoc = updateDoc;
+        window.firestoreCollection = collection;
+        window.firestoreAddDoc = addDoc;
+
+        // Check authentication
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('User logged in:', user.uid);
+                window.currentUserId = user.uid;
+                
+                // Initialize app with user data
+                if (typeof initWithUser === 'function') {
+                    initWithUser(user);
+                }
+            } else {
+                console.log('No user logged in');
+                // Redirect to login if not authenticated
+                // Uncomment this when you want to enforce login:
+                // window.location.href = 'sahasnap-login.html';
+            }
+        });
+    </script>
+
+
+    <script>
+
+        // Toggle password visibility
+        function togglePassword() {
+            var passwordInput = document.getElementById('password');
+            var toggleBtn = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+
+        // Handle login form submission
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            
+            // Disable button
+            var loginBtn = event.target.querySelector('.btn-login');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'جاري تسجيل الدخول...';
+            
+            // Firebase Authentication
+            window.signInWithEmailAndPassword(window.firebaseAuth, email, password)
+                .then(function(userCredential) {
+                    var user = userCredential.user;
+                    console.log('Login successful:', user.uid);
+                    
+                    showSuccess('تسجيل دخول ناجح!');
+                    
+                    // Redirect to main app
+                    setTimeout(function() {
+                        window.location.href = 'sahasnap-subscription.html';
+                    }, 1000);
+                })
+                .catch(function(error) {
+                    console.error('Login error:', error);
+                    
+                    var errorMsg = 'خطأ في تسجيل الدخول';
+                    if (error.code === 'auth/user-not-found') {
+                        errorMsg = 'المستخدم غير موجود';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMsg = 'كلمة المرور غير صحيحة';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg = 'البريد الإلكتروني غير صحيح';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMsg = 'محاولات كثيرة، حاول لاحقاً';
+                    }
+                    
+                    showError(errorMsg);
+                    
+                    // Re-enable button
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'تسجيل الدخول';
+                });
+        }
+
+        // Login with Google
+        function loginWithGoogle() {
+            // Firebase Google Authentication
+            window.signInWithPopup(window.firebaseAuth, window.firebaseGoogleProvider)
+                .then(function(result) {
+                    var user = result.user;
+                    console.log('Google login successful:', user.uid);
+                    
+                    showSuccess('تسجيل دخول ناجح عبر Google!');
+                    
+                    // Redirect to main app
+                    setTimeout(function() {
+                        window.location.href = 'sahasnap-subscription.html';
+                    }, 1000);
+                })
+                .catch(function(error) {
+                    console.error('Google login error:', error);
+                    
+                    var errorMsg = 'خطأ في تسجيل الدخول عبر Google';
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        errorMsg = 'تم إلغاء تسجيل الدخول';
+                    } else if (error.code === 'auth/popup-blocked') {
+                        errorMsg = 'يرجى السماح للنوافذ المنبثقة';
+                    }
+                    
+                    showError(errorMsg);
+                });
+        }
+
+        // Guest login (Anonymous Authentication)
+        function guestLogin() {
+            console.log('Guest login - Anonymous');
+            
+            // Firebase Anonymous Auth
+            window.signInAnonymously(window.firebaseAuth)
+                .then(function(userCredential) {
+                    var user = userCredential.user;
+                    console.log('Anonymous login successful:', user.uid);
+                    
+                    // Mark as guest
+                    localStorage.setItem('isGuest', 'true');
+                    
+                    // Redirect to app
+                    window.location.href = 'sahasnap-subscription.html';
+                })
+                .catch(function(error) {
+                    console.error('Anonymous login error:', error);
+                    showError('خطأ في تسجيل الدخول كزائر');
+                });
+        }
+
+        // Forgot password
+        function forgotPassword() {
+            var email = prompt('أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور:');
+            
+            if (email) {
+                // Firebase Password Reset
+                window.sendPasswordResetEmail(window.firebaseAuth, email)
+                    .then(function() {
+                        showSuccess('تم إرسال رابط إعادة التعيين إلى ' + email);
+                    })
+                    .catch(function(error) {
+                        console.error('Password reset error:', error);
+                        
+                        var errorMsg = 'خطأ في إرسال الرابط';
+                        if (error.code === 'auth/user-not-found') {
+                            errorMsg = 'البريد الإلكتروني غير مسجل';
+                        } else if (error.code === 'auth/invalid-email') {
+                            errorMsg = 'البريد الإلكتروني غير صحيح';
+                        }
+                        
+                        showError(errorMsg);
+                    });
+            }
+        }
+
+        // Create new account
+        function createAccount() {
+            // Redirect to signup page (you can create this later)
+            alert('سيتم توجيهك لصفحة إنشاء حساب جديد');
+            // window.location.href = 'sahasnap-signup.html';
+        }
+
+        // Show error message
+        function showError(message) {
+            var errorBox = document.getElementById('errorMessage');
+            errorBox.textContent = message;
+            errorBox.style.display = 'block';
+            
+            setTimeout(function() {
+                errorBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            var errorBox = document.getElementById('errorMessage');
+            errorBox.style.background = '#d1fae5';
+            errorBox.style.borderColor = '#10b981';
+            errorBox.style.color = '#065f46';
+            errorBox.textContent = '✓ ' + message;
+            errorBox.style.display = 'block';
+        }
+    
+    </script>
+</body>
+</html>
